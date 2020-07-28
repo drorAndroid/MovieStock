@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MovieStock</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Overview">Overview:</string>
+    <string name="Number_of_votes">Number of votes:</string>
+    <string name="Votes_average">Votes average:</string>
+    <string name="Most_Popular">Most Popular</string>
+    <string name="Top_Rated">Top Rated</string>
+</resources>
