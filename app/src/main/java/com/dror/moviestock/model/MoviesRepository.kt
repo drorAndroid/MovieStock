@@ -1,6 +1,5 @@
 package com.dror.moviestock.model
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
 import com.dror.moviestock.application.MovieStockApplication
@@ -79,8 +78,10 @@ class MoviesRepository @Inject constructor(private val moviesService: MoviesServ
     private fun observeData(db: Observable<List<Movie>>, remote: Observable<List<Movie>>) {
         disposable.add(
             Observable.concat(db, remote)
+                .filter { it.isNotEmpty() }
                 .timeout(100, TimeUnit.MILLISECONDS)
                 .onErrorResumeNext(remote)
+                .firstElement()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
