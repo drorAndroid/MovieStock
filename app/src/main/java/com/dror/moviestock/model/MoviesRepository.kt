@@ -13,6 +13,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,7 +45,6 @@ class MoviesRepository @Inject constructor(private val moviesService: MoviesServ
         val dbObservable = db.movieDao().getAll()
             .flatMap { movies ->
                 val filteredList = movies.filter { it.movieList.contains(MovieListUtils.MovieList.topRated) }
-                if(filteredList.isEmpty()) return@flatMap apiObservable
 
                 return@flatMap Single.just(filteredList).toObservable()
             }
@@ -64,7 +64,6 @@ class MoviesRepository @Inject constructor(private val moviesService: MoviesServ
         val dbObservable = db.movieDao().getAll()
             .flatMap { movies ->
                 val filteredList = movies.filter { it.movieList.contains(MovieListUtils.MovieList.mostPopular) }
-                if(filteredList.isEmpty()) return@flatMap apiObservable
 
                 return@flatMap Single.just(filteredList).toObservable()
             }
@@ -80,6 +79,8 @@ class MoviesRepository @Inject constructor(private val moviesService: MoviesServ
     private fun observeData(db: Observable<List<Movie>>, remote: Observable<List<Movie>>) {
         disposable.add(
             Observable.concat(db, remote)
+                .timeout(100, TimeUnit.MILLISECONDS)
+                .onErrorResumeNext(remote)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
