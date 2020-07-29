@@ -2,13 +2,13 @@ package com.dror.moviestock.data.network
 
 import com.dror.moviestock.di.DaggerApplicationComponent
 import com.dror.moviestock.model.MovieWrapper
+import com.dror.moviestock.utils.API_KEY
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MoviesService @Inject constructor(private val moviesAPI: MoviesAPI): BaseAPIService() {
-    override val API_KEY = "0a8ab7ce3f47d45c34ab826104d793fc"
 
     init {
         DaggerApplicationComponent.create().inject(this)

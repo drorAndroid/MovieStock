@@ -8,8 +8,6 @@ import com.dror.moviestock.application.MovieStockApplication
 
 
 abstract class BaseAPIService {
-    abstract val API_KEY: String
-
     @Suppress("DEPRECATION")
     fun isNetworkAvailable(): Boolean {
         var result = false
