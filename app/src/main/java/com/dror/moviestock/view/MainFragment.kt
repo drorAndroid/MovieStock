@@ -50,7 +50,7 @@ class MainFragment : Fragment() {
 
 
         swipeRefreshLayout.setOnRefreshListener {
-            getMoviesBySpinnerPosition(movieListSpinner.selectedItemPosition)
+            getMoviesBySpinnerPosition(movieListSpinner.selectedItemPosition, true)
         }
 
         val adapter = ArrayAdapter(requireContext(),
@@ -83,13 +83,19 @@ class MainFragment : Fragment() {
         })
     }
 
-    private fun getMoviesBySpinnerPosition(movieListPosition: Int) {
-        if(movieLists[movieListPosition] == getString(R.string.Top_Rated)) {
-            moviesViewModel.getMovies(MovieListUtils.MovieList.topRated)
+    private fun getMoviesBySpinnerPosition(movieListPosition: Int, isRefresh: Boolean = false) {
+        var list = MovieListUtils.MovieList.topRated
+        if(movieLists[movieListPosition] == getString(R.string.Most_Popular)) {
+            list = MovieListUtils.MovieList.mostPopular
         }
-        else if(movieLists[movieListPosition] == getString(R.string.Most_Popular)) {
-            moviesViewModel.getMovies(MovieListUtils.MovieList.mostPopular)
+
+        if(isRefresh) {
+            moviesViewModel.refresh(list)
         }
+        else {
+            moviesViewModel.getMovies(list)
+        }
+
     }
 
     private fun updateMovieList(movies: List<Movie>) {

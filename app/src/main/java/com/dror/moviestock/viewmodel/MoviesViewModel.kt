@@ -25,13 +25,12 @@ class MoviesViewModel: ViewModel() {
         movies = repository.movies
     }
 
+    fun refresh(list: MovieListUtils.MovieList) {
+        repository.refresh(list)
+    }
+
     fun getMovies(list: MovieListUtils.MovieList) {
-        if(list == MovieListUtils.MovieList.topRated) {
-            repository.getTopRatedMovies()
-        }
-        else if(list == MovieListUtils.MovieList.mostPopular) {
-            repository.getMostPopularMovies()
-        }
+        repository.getMovies(list)
     }
 
     fun setCurrentMovie(movie: Movie) {

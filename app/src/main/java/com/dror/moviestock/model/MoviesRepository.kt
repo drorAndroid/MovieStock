@@ -2,10 +2,11 @@ package com.dror.moviestock.model
 
 import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
+import com.dror.moviestock.R
 import com.dror.moviestock.application.MovieStockApplication
 import com.dror.moviestock.data.db.MovieDatabase
-import com.dror.moviestock.di.DaggerApplicationComponent
 import com.dror.moviestock.data.network.MoviesService
+import com.dror.moviestock.di.DaggerApplicationComponent
 import com.dror.moviestock.utils.MovieListUtils
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -31,38 +32,42 @@ class MoviesRepository @Inject constructor(private val moviesService: MoviesServ
                 .build()
     }
 
-    fun getTopRatedMovies() {
-        val apiObservable = moviesService.getTopRatedMovies()
+    fun refresh(movieList: MovieListUtils.MovieList) {
+        if(moviesService.isNetworkAvailable()) {
+            disposable.add(
+                Observable.just(Unit)
+                    .doOnNext {
+                        db.movieDao().deleteAll()
+                    }
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        getMovies(movieList)
+                    }
+            )
+        }
+        else {
+            updateResponse(Status.ERROR, null, MovieStockApplication.appContext.getString(R.string.No_Internet_Connection))
+        }
+    }
+
+    fun getMovies(movieList: MovieListUtils.MovieList) {
+        val moviesObservable: Single<MovieWrapper> = if(movieList == MovieListUtils.MovieList.topRated) {
+            moviesService.getTopRatedMovies()
+        }
+        else moviesService.getMostPopularMovies()
+        val apiObservable =  moviesObservable
             .map {
                 it.results
             }
             .toObservable()
             .doOnNext { movies ->
-                movies.forEach { it.movieList.add(MovieListUtils.MovieList.topRated) }
+                movies.forEach { it.movieList.add(movieList) }
                 db.movieDao().insertAll(movies)
             }
         val dbObservable = db.movieDao().getAll()
             .flatMap { movies ->
-                val filteredList = movies.filter { it.movieList.contains(MovieListUtils.MovieList.topRated) }
-
-                return@flatMap Single.just(filteredList).toObservable()
-            }
-
-        observeData(dbObservable, apiObservable)
-    }
-
-    fun getMostPopularMovies() {
-        val apiObservable = moviesService.getMostPopularMovies()
-            .map {
-                it.results
-            }.toObservable()
-            .doOnNext { movies ->
-                movies.forEach { it.movieList.add(MovieListUtils.MovieList.mostPopular) }
-                db.movieDao().insertAll(movies)
-            }
-        val dbObservable = db.movieDao().getAll()
-            .flatMap { movies ->
-                val filteredList = movies.filter { it.movieList.contains(MovieListUtils.MovieList.mostPopular) }
+                val filteredList = movies.filter { it.movieList.contains(movieList) }
 
                 return@flatMap Single.just(filteredList).toObservable()
             }

@@ -7,4 +7,5 @@
     <string name="Votes_average">Votes average:</string>
     <string name="Most_Popular">Most Popular</string>
     <string name="Top_Rated">Top Rated</string>
+    <string name="No_Internet_Connection">No Internet Connection</string>
 </resources>
